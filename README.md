@@ -1,3 +1,4 @@
+![Chess Royale Logo](https://github.com/YeeticusFinch/Chess-Battle-Royale/assets/50182007/acf8b9cf-00cd-4789-9f50-2b2ea3653e30)
 # Chess-Battle-Royale
 What if chess was a battle royale? Your pieces are on an infinite board, you don't take turns, instead you just move whenever you want, it is always everyone's turn.... utter chaos
 
