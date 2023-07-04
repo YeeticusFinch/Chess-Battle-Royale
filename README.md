@@ -12,3 +12,5 @@ This is an online game, anyone can connect (currently just over LAN), and there 
 ## Demo video:
 
 https://youtu.be/PhTd3Y0KXGQ
+
+[![Fancy Demo Video](https://img.youtube.com/vi/PhTd3Y0KXGQ/0.jpg)](https://www.youtube.com/watch?v=PhTd3Y0KXGQ)
