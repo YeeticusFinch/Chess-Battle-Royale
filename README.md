@@ -8,3 +8,7 @@ Each player spawns in as a king, this king can be moved using the arrow keys or 
 The pieces will automatically follow the king, and the player can of-course manually move these pieces.
 
 This is an online game, anyone can connect (currently just over LAN), and there can be up to 10 players in one game.
+
+## Demo video:
+
+https://youtu.be/PhTd3Y0KXGQ
