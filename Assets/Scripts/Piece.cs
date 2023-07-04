@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Piece : MonoBehaviour {
@@ -16,9 +17,11 @@ public class Piece : MonoBehaviour {
 
     public bool decoration = false;
 
+    public bool canMove = true;
+
     // Use this for initialization
     void Start () {
-		
+        canMove = true;
 	}
 	
 	// Update is called once per frame
@@ -28,23 +31,209 @@ public class Piece : MonoBehaviour {
 
     public void Init(Player owner)
     {
+
         this.owner = owner;
         ownerNum = owner.playerNum;
+
+        Color color = Game.playerColors[ownerNum];
+        Color color2 = new Color(color.b, color.r, color.g);
+        GetComponent<Renderer>().materials[0].SetColor("_Color", color);
+        GetComponent<Renderer>().materials[0].EnableKeyword("_EMISSION");
+        GetComponent<Renderer>().materials[0].SetColor("_EmissionColor", color);
+
+        GetComponent<Renderer>().materials[1].SetColor("_Color", color2);
+        GetComponent<Renderer>().materials[1].EnableKeyword("_EMISSION");
+        GetComponent<Renderer>().materials[1].SetColor("_EmissionColor", color2);
+        GetComponent<Renderer>().materials[1].SetFloat("_EmissionStrength", 3);
     }
 
-    public bool MoveRandomly(int dx, int dy)
+    public int[] MoveRandomly()
     {
-        return false;
+        if (moves == null || moves.Count < 1)
+        {
+            if (useMoveSets.Count > 0)
+                foreach (string str in useMoveSets)
+                    if (Game.moveSets.ContainsKey(str))
+                        foreach (Game.Move m in Game.moveSets[str])
+                            moves.Add(m);
+        }
+
+        System.Random r = new System.Random();
+        foreach (int i in Enumerable.Range(0, moves.Count).OrderBy(x => r.Next()))
+        {
+            foreach (int dx in Enumerable.Range(-1, 3).OrderBy(x => r.Next()))
+            {
+                foreach (int dy in Enumerable.Range(-1, 3).OrderBy(x => r.Next()))
+                {
+                    int[] yeet = FirstLine(moves[i], dx, dy);
+                    if (yeet != null)
+                    {
+                        return new int[] { yeet[0] + loc[0], yeet[1] + loc[1] };
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public int[] FirstLine(Game.Move m, int dx, int dy)
+    {
+        int tx = 0;
+        int ty = 0;
+        int[] result = null;
+        for (int i = 0; i < m.range; i++)
+        {
+            tx += m.dx * m.step * (int)Mathf.Sign(dx);
+            ty += m.dy * m.step * (int)Mathf.Sign(dy);
+            int r = ValidMove(new int[] { loc[0] + tx, loc[1] + ty }, m);
+            if (r == MOVE_NOT_ALLOWED)
+                break;
+            else if (r == MOVE_NOT_ALLOWED_CAN_MOVE_FURTHER)
+                continue;
+            result = new int[] { tx, ty };
+            break;
+        }
+        return result;
     }
 
     public void Die(Player consumer)
     {
         consumer.points += selfWorth;
         if (Game.pieces.ContainsKey(loc) && Game.pieces[loc] == this)
-            Game.pieces[loc] = null;
-        GameObject.Destroy(this);
+            Game.pieces.Remove(loc);
+        canMove = false;
+        StartCoroutine(Death());
     }
 
+    public IEnumerator Death()
+    {
+        Color color = Color.red;
+        Color color2 = Color.black;
+        GetComponent<Renderer>().materials[0].SetColor("_Color", color);
+        GetComponent<Renderer>().materials[0].EnableKeyword("_EMISSION");
+        GetComponent<Renderer>().materials[0].SetColor("_EmissionColor", color);
+
+        GetComponent<Renderer>().materials[1].SetColor("_Color", color2);
+        GetComponent<Renderer>().materials[1].EnableKeyword("_EMISSION");
+        GetComponent<Renderer>().materials[1].SetColor("_EmissionColor", color2);
+        GetComponent<Renderer>().materials[1].SetFloat("_EmissionStrength", 3);
+
+        for (int i = 0; i < 10; i++)
+        {
+            transform.localScale *= 0.7f;
+            yield return new WaitForSeconds(0.01f);
+        }
+
+        GameObject.Destroy(this.gameObject);
+    }
+
+    public int[] GetClosestMove(int[] target)
+    {
+        int[] disp = { target[0] - loc[0], target[1] - loc[1] };
+        int[] result = { 0, 0 };
+        if (moves == null || moves.Count < 1)
+        {
+            if (useMoveSets.Count > 0)
+                foreach (string str in useMoveSets)
+                    if (Game.moveSets.ContainsKey(str))
+                        foreach (Game.Move m in Game.moveSets[str])
+                            moves.Add(m);
+        }
+
+        foreach (Game.Move m in moves)
+        {
+            result = ClosestLine(result, m, disp[0], disp[1]);
+            if (result[0] == target[0] && result[1] == target[1]) break;
+        }
+
+        return new int[]{loc[0] + result[0], loc[1] + result[1]};
+    }
+
+
+    public int[] ClosestLine(int[] currBest, Game.Move m, int dx, int dy)
+    {
+        int tx = 0;
+        int ty = 0;
+        for (int i = 0; i < m.range; i++)
+        {
+            tx += m.dx * m.step * (int)Mathf.Sign(dx);
+            ty += m.dy * m.step * (int)Mathf.Sign(dy);
+            int r = ValidMove(new int[] { loc[0] + tx, loc[1] + ty }, m);
+            if (r == MOVE_NOT_ALLOWED)
+                break;
+            else if (r == MOVE_NOT_ALLOWED_CAN_MOVE_FURTHER)
+                continue;
+            if (tx == dx && ty == dy)
+            {
+                currBest[0] = tx;
+                currBest[1] = ty;
+                break;
+            }
+            if (CarlMath.Dist(tx, ty, dx, dy) < CarlMath.Dist(currBest[0], currBest[1], dx, dy))
+            {
+                currBest[0] = tx;
+                currBest[1] = ty;
+            }
+            if (r == MOVE_ALLOWED_CANNOT_MOVE_FURTHER)
+                break;
+        }
+        return currBest;
+    }
+
+    private static int MOVE_NOT_ALLOWED = 0;
+    private static int MOVE_ALLOWED_CAN_MOVE_FURTHER = 1;
+    private static int MOVE_ALLOWED_CANNOT_MOVE_FURTHER = 2;
+    private static int MOVE_NOT_ALLOWED_CAN_MOVE_FURTHER = 3;
+    
+    public int ValidMove(int[] pos, Game.Move m)
+    {
+        if (Game.pieces.ContainsKey(pos)) // Pieces
+        {
+            if (Game.pieces[pos].ownerNum == ownerNum) // Same color
+            {
+                if (m.jump)
+                    return MOVE_NOT_ALLOWED_CAN_MOVE_FURTHER;
+                return MOVE_NOT_ALLOWED;
+            }
+            else // Different color
+            {
+                if (m.canConsume || m.onlyForConsume)
+                {
+                    if (m.jump)
+                        return MOVE_ALLOWED_CAN_MOVE_FURTHER;
+                    return MOVE_ALLOWED_CANNOT_MOVE_FURTHER;
+                }
+                if (m.jump)
+                    return MOVE_NOT_ALLOWED_CAN_MOVE_FURTHER;
+            }
+        } else if (Game.players.ContainsKey(pos)) // Kings
+        {
+            if (Game.players[pos].playerNum == ownerNum) // Same color
+            {
+                if (m.jump)
+                    return MOVE_NOT_ALLOWED_CAN_MOVE_FURTHER;
+                return MOVE_NOT_ALLOWED;
+            }
+            else // Different color
+            {
+                if (m.canConsume || m.onlyForConsume)
+                {
+                    if (m.jump)
+                        return MOVE_ALLOWED_CAN_MOVE_FURTHER;
+                    return MOVE_ALLOWED_CANNOT_MOVE_FURTHER;
+                }
+                if (m.jump)
+                    return MOVE_NOT_ALLOWED_CAN_MOVE_FURTHER;
+            }
+        }
+        else if (m.onlyForConsume)
+            return MOVE_NOT_ALLOWED;
+        return MOVE_ALLOWED_CAN_MOVE_FURTHER;
+    }
+
+    // Old shit
+    /*
     // int lateral, int diagonal = 0, bool onlyForward = false, bool force = false, bool jump = false, bool canConsume = true, bool onlyForConsume = false, bool firstMove = false
     public List<int[]> GetMovableLocations()
     {
@@ -182,5 +371,5 @@ public class Piece : MonoBehaviour {
         //board.squares[str].TempColor(Color.black);
         if (m.jump) return 4;
         return 3;
-    }
+    }*/
 }

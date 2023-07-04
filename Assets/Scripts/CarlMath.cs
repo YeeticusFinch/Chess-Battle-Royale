@@ -90,4 +90,19 @@ public class CarlMath : MonoBehaviour
         else return a;
         //return new Vector3(Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Min(a.z, b.z));
     }
+
+    public static float Dist(int[] a, int[] b)
+    {
+        float sum = 0;
+        for (int i = 0; i < a.Length; i++)
+        {
+            sum += Mathf.Pow(b[i] - a[i], 2);
+        }
+        return Mathf.Sqrt(sum);
+    }
+
+    public static float Dist(int a, int b, int x, int y)
+    {
+        return Mathf.Sqrt(Mathf.Pow(x - a, 2) + Mathf.Pow(y - b, 2));
+    }
 }

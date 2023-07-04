@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 33681608774202786}
   - component: {fileID: 23811659820471156}
   - component: {fileID: 114562364199796810}
+  - component: {fileID: 65023683872466526}
   m_Layer: 0
   m_Name: Princess
   m_TagString: Untagged
@@ -36,7 +37,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1624667108746482}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0.7071068, w: 0}
-  m_LocalPosition: {x: 1, y: -7, z: 4}
+  m_LocalPosition: {x: 1, y: -7, z: 5}
   m_LocalScale: {x: 6, y: 6, z: 6}
   m_Children: []
   m_Father: {fileID: 0}
@@ -84,6 +85,18 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1624667108746482}
   m_Mesh: {fileID: 4300000, guid: cbde310e26ecdee4daf365a060d4b987, type: 3}
+--- !u!65 &65023683872466526
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1624667108746482}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Size: {x: 0.04, y: 0.04, z: 0.6684256}
+  m_Center: {x: -0.005276698, y: -0.008613955, z: 0.33421284}
 --- !u!114 &114562364199796810
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -103,3 +116,4 @@ MonoBehaviour:
   moves: []
   useMoveSets:
   - princess
+  decoration: 0

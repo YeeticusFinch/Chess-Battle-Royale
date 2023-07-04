@@ -2,11 +2,45 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public class FancyEqualityComparer : IEqualityComparer<int[]>
+{
+    public bool Equals(int[] x, int[] y)
+    {
+        //Debug.Log("Checking equality");
+        if (x.Length != y.Length)
+        {
+            return false;
+        }
+        for (int i = 0; i < x.Length; i++)
+        {
+            if (x[i] != y[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public int GetHashCode(int[] obj)
+    {
+        //Debug.Log("Getting Hash Code");
+        int result = 17;
+        for (int i = 0; i < obj.Length; i++)
+        {
+            unchecked
+            {
+                result = result * 23 + obj[i];
+            }
+        }
+        return result;
+    }
+}
+
 public class Game : MonoBehaviour {
 
     public static Game instance;
-    public static Dictionary<int[], Piece> pieces = new Dictionary<int[], Piece>();
-    public static Dictionary<int[], Player> players = new Dictionary<int[], Player>();
+    public static Dictionary<int[], Piece> pieces = new Dictionary<int[], Piece>(new FancyEqualityComparer());
+    public static Dictionary<int[], Player> players = new Dictionary<int[], Player>(new FancyEqualityComparer());
 
     public static Dictionary<string, Move[]> moveSets = new Dictionary<string, Move[]>();
 
@@ -26,6 +60,8 @@ public class Game : MonoBehaviour {
         new Color(0.1f, 0.5f, 1f),
     };
 
+    // Old Shit
+    /*
     [System.Serializable]
     public struct Move
     {
@@ -51,6 +87,29 @@ public class Game : MonoBehaviour {
         public int diagonal; // movement across any 45 degree diagonal (ie bishops, queens)
         public bool firstMove; // can only use this move if it's the first move (pawns)
         public int step; // 1 means nothing gets skipped, 2 means every other step, 3 means every third step...
+    }*/
+
+    [System.Serializable]
+    public struct Move
+    {
+        public Move(int dx = 0, int dy = 0, int range = 8, bool jump = false, bool canConsume = true, bool onlyForConsume = false, int step = 1)
+        {
+            this.range = range;
+            this.jump = jump;
+            this.canConsume = canConsume;
+            this.onlyForConsume = onlyForConsume;
+            this.dx = dx;
+            this.dy = dy;
+            this.step = step;
+        }
+        
+        public bool canConsume; // can this move result in the consumption of another piece
+        public bool jump; // can jump over other (ie knights)
+        public bool onlyForConsume; // this move can only be used to consume another piece (ie pawns)
+        public int dx; // movement in the x direction
+        public int dy; // movement in the y direction
+        public int step; // 1 means nothing gets skipped, 2 means every other step, 3 means every third step...
+        public int range; // maximum amount of steps it can take
     }
 
     public static int PLAYER_WORTH = 10;
@@ -58,6 +117,42 @@ public class Game : MonoBehaviour {
     // Use this for initialization
     void Start () {
         instance = this;
+
+        moveSets.Add("queen", new Move[] {
+            new Move(1, 0), // left right
+            new Move(1, 1), // diagonals
+            new Move(0, 1), // up down
+        });
+        moveSets.Add("bishop", new Move[] {
+            new Move(1, 1) // only diagonals
+        });
+        moveSets.Add("knight", new Move[] { // only catch is the diagonal needs to have a component vector in the same direction as the lateral (prob needs to be hardcoded)
+            new Move(2, 1, 1, true), // 2 left/right and 1 up/down, can only do one step, can jump
+            new Move(1, 2, 1, true), // 1 left/right and 2 up/down, can only do one step, can jump
+        });
+        moveSets.Add("rook", new Move[] {
+            new Move(1, 0), // move horizontally
+            new Move(0, 1), // move vertically
+        });
+        moveSets.Add("pawn", new Move[] {
+            new Move(1, 0, 1, false, false), // moves horizontally, can't consume
+            new Move(0, 1, 1, false, false), // moves vertically, can't consume
+            new Move(1, 1, 1, false, true, true), // moves diagonally to consume, can only be used to consume
+        });
+        moveSets.Add("princess", new Move[] { // combines my two fav pieces from traditional chess (knight and bishop)
+            new Move(2, 1, 1, true), // 2 left/right and 1 up/down, can only do one step, can jump
+            new Move(1, 2, 1, true), // 1 left/right and 2 up/down, can only do one step, can jump
+            new Move(1, 1) // only diagonals
+        });
+        moveSets.Add("empress", new Move[] {
+            new Move(2, 1, 1, true), // 2 left/right and 1 up/down, can only do one step, can jump
+            new Move(1, 2, 1, true), // 1 left/right and 2 up/down, can only do one step, can jump
+            new Move(1, 0), // move horizontally
+            new Move(0, 1), // move vertically
+        });
+
+        // Old Shit
+        /*
         moveSets.Add("queen", new Move[] {
             new Move(-1),
             new Move(0, -1),
@@ -82,7 +177,7 @@ public class Game : MonoBehaviour {
         moveSets.Add("empress", new Move[] {
             new Move(1, 1, false, true, true), // knight moves (with jumping)
             new Move(-1) // rook moves
-        });
+        });*/
 	}
 	
 	// Update is called once per frame
@@ -102,7 +197,8 @@ public class Game : MonoBehaviour {
         for (int i = 0; i < m; i++)
         {
             yield return new WaitForSeconds(Mathf.Min(time-0.01f*i, 0.01f));
-            t.position += (pos - t.position) / m;
+            t.position += 2*(pos - t.position) / m;
         }
+        t.position = pos;
     }
 }

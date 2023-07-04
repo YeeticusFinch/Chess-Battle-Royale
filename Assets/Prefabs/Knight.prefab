@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 33635455982856384}
   - component: {fileID: 23422463116795412}
   - component: {fileID: 114917056188462072}
+  - component: {fileID: 65338230284652102}
   m_Layer: 0
   m_Name: Knight
   m_TagString: Untagged
@@ -36,7 +37,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1965180436796154}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0.7071068, w: 0}
-  m_LocalPosition: {x: -1, y: -7, z: 2}
+  m_LocalPosition: {x: -1, y: -7, z: 3}
   m_LocalScale: {x: 40, y: 40, z: 56}
   m_Children: []
   m_Father: {fileID: 0}
@@ -84,6 +85,18 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1965180436796154}
   m_Mesh: {fileID: 4300000, guid: 08aaa488d75b11c42bb71352bd9789a1, type: 3}
+--- !u!65 &65338230284652102
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1965180436796154}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Size: {x: 0.04, y: 0.04, z: 0.06388553}
+  m_Center: {x: 0.0015338755, y: 0.0014368077, z: 0.031818345}
 --- !u!114 &114917056188462072
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -103,3 +116,4 @@ MonoBehaviour:
   moves: []
   useMoveSets:
   - knight
+  decoration: 0

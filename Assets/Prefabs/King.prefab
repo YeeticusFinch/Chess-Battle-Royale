@@ -323,6 +323,10 @@ MonoBehaviour:
     n: 1
   - prefab: {fileID: 1428789683325762, guid: abf69b191e7d5b94f9be6290c06bd946, type: 2}
     n: 2
+  cam: {fileID: 20380926223134128}
+  selPiece: {fileID: 0}
+  availableMove: {fileID: 1376059321568668, guid: 0922978d27ea29e4b972a4f7d67ce64f,
+    type: 2}
 --- !u!124 &124654250835964086
 Behaviour:
   m_ObjectHideFlags: 1

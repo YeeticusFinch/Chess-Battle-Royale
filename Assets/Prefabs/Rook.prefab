@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 33296466402121340}
   - component: {fileID: 23113381408745644}
   - component: {fileID: 114350942420892130}
+  - component: {fileID: 65805132011606894}
   m_Layer: 0
   m_Name: Rook
   m_TagString: Untagged
@@ -36,7 +37,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1428789683325762}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0.7071068, w: 0}
-  m_LocalPosition: {x: 1, y: -7, z: 2}
+  m_LocalPosition: {x: 1, y: -7, z: 1}
   m_LocalScale: {x: 40, y: 40, z: 56}
   m_Children: []
   m_Father: {fileID: 0}
@@ -84,6 +85,18 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1428789683325762}
   m_Mesh: {fileID: 4300000, guid: a2fd2780148018644aa3b824bbcee2f0, type: 3}
+--- !u!65 &65805132011606894
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1428789683325762}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Size: {x: 0.04, y: 0.04, z: 0.05195942}
+  m_Center: {x: 0.000032098513, y: 0.0003343265, z: 0.025824733}
 --- !u!114 &114350942420892130
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -103,3 +116,4 @@ MonoBehaviour:
   moves: []
   useMoveSets:
   - rook
+  decoration: 0

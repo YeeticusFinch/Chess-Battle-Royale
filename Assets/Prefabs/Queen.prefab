@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 33018894885014402}
   - component: {fileID: 23468961589749488}
   - component: {fileID: 114648355661852568}
+  - component: {fileID: 65685255901915804}
   m_Layer: 0
   m_Name: Queen
   m_TagString: Untagged
@@ -36,7 +37,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1983284976924048}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0.7071068, w: 0}
-  m_LocalPosition: {x: 2, y: -7, z: 0}
+  m_LocalPosition: {x: 3, y: -7, z: 1}
   m_LocalScale: {x: 40, y: 40, z: 56}
   m_Children: []
   m_Father: {fileID: 0}
@@ -84,6 +85,18 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1983284976924048}
   m_Mesh: {fileID: 4300000, guid: fdf4c2b1b6493c8468cc06b8bc9db404, type: 3}
+--- !u!65 &65685255901915804
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1983284976924048}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Size: {x: 0.04, y: 0.04, z: 0.074033536}
+  m_Center: {x: 0.000033378616, y: -0.0011955672, z: 0.036861785}
 --- !u!114 &114648355661852568
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -103,3 +116,4 @@ MonoBehaviour:
   moves: []
   useMoveSets:
   - queen
+  decoration: 0
