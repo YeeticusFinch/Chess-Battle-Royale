@@ -41,6 +41,8 @@ public class Game : MonoBehaviour {
     public static Game instance;
     public static Dictionary<int[], Piece> pieces = new Dictionary<int[], Piece>(new FancyEqualityComparer());
     public static Dictionary<int[], Player> players = new Dictionary<int[], Player>(new FancyEqualityComparer());
+    public static List<Player> playersByNum = new List<Player>();
+    public static Player localPlayer;
 
     public static Dictionary<string, Move[]> moveSets = new Dictionary<string, Move[]>();
 

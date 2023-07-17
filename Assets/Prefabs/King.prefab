@@ -43,6 +43,7 @@ GameObject:
   - component: {fileID: 114242928327572996}
   - component: {fileID: 114469884872002762}
   - component: {fileID: 114710967774688632}
+  - component: {fileID: 114241710522529046}
   m_Layer: 0
   m_Name: King
   m_TagString: Untagged
@@ -242,6 +243,19 @@ MonoBehaviour:
   glareSample3Angle: 135
   glareSample3Intensity: 1
   glareSample3Offset: 0
+--- !u!114 &114241710522529046
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1741861410398570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a790905314d84a40a5dece268ce28d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  theta_scale: 0.01
+  radius: 3
 --- !u!114 &114242928327572996
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -312,17 +326,8 @@ MonoBehaviour:
   points: 0
   spawned: 0
   cpu: 0
-  spawnSets:
-  - prefab: {fileID: 1187302850589982, guid: 2f904e9b55791b04e8fc99e7d6e0901e, type: 2}
-    n: 2
-  - prefab: {fileID: 1965180436796154, guid: a9c2ecbf0eb53b345a8e8dd6051f9906, type: 2}
-    n: 2
-  - prefab: {fileID: 1190720969798116, guid: ec437f21d01563649bf9bdb53ca4bb05, type: 2}
-    n: 8
-  - prefab: {fileID: 1983284976924048, guid: 3702627eb836d204e9fa62688fcd1bb8, type: 2}
-    n: 1
-  - prefab: {fileID: 1428789683325762, guid: abf69b191e7d5b94f9be6290c06bd946, type: 2}
-    n: 2
+  aura: {fileID: 0}
+  spawnSets: []
   cam: {fileID: 20380926223134128}
   selPiece: {fileID: 0}
   availableMove: {fileID: 1376059321568668, guid: 0922978d27ea29e4b972a4f7d67ce64f,

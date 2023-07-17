@@ -14,6 +14,8 @@ public class Player : NetworkBehaviour {
     public bool spawned = false;
     public bool cpu = false;
 
+    public CircleDraw aura;
+
     public SpawnSet[] spawnSets;
 
     [System.Serializable]
@@ -29,28 +31,44 @@ public class Player : NetworkBehaviour {
 
     // Use this for initialization
     void Start () {
-        transform.eulerAngles = new Vector3(-90, 0, 180);
-        int[] newSpawn = new int[] { (int)Random.Range(-1000, 1000), (int)Random.Range(-1000, 1000) };
-        if (!isServer)
-        {
-            CmdRespawn(newSpawn);
-            Respawn(newSpawn);
-        }
-        else
-        {
-            playerNum = 0;
-            RpcRespawn(newSpawn);
-        }
-        Color color = Game.playerColors[playerNum];
-        Color color2 = new Color(color.b, color.r, color.g);
-        GetComponent<Renderer>().materials[0].SetColor("_Color", color);
-        GetComponent<Renderer>().materials[0].EnableKeyword("_EMISSION");
-        GetComponent<Renderer>().materials[0].SetColor("_EmissionColor", color);
 
-        GetComponent<Renderer>().materials[1].SetColor("_Color", color2);
-        GetComponent<Renderer>().materials[1].EnableKeyword("_EMISSION");
-        GetComponent<Renderer>().materials[1].SetColor("_EmissionColor", color2);
-        GetComponent<Renderer>().materials[1].SetFloat("_EmissionStrength", 3);
+        aura = GetComponent<CircleDraw>();
+
+        transform.eulerAngles = new Vector3(-90, 0, 180);
+        if (isLocalPlayer && isServer)
+        {
+            Game.localPlayer = this;
+            int playerNum = 0;
+            Game.playersByNum.Insert(0, this);
+            int[] newSpawn = new int[] { (int)Random.Range(-1000, 1000), (int)Random.Range(-1000, 1000) };
+            if (!isServer)
+            {
+                CmdRespawn(newSpawn);
+                Respawn(newSpawn);
+            }
+            else
+            {
+                playerNum = 0;
+                RpcRespawn(newSpawn);
+            }
+            Color color = Game.playerColors[playerNum];
+            Color color2 = new Color(color.b, color.r, color.g);
+            GetComponent<Renderer>().materials[0].SetColor("_Color", color);
+            GetComponent<Renderer>().materials[0].EnableKeyword("_EMISSION");
+            GetComponent<Renderer>().materials[0].SetColor("_EmissionColor", color);
+
+            GetComponent<Renderer>().materials[1].SetColor("_Color", color2);
+            GetComponent<Renderer>().materials[1].EnableKeyword("_EMISSION");
+            GetComponent<Renderer>().materials[1].SetColor("_EmissionColor", color2);
+            GetComponent<Renderer>().materials[1].SetFloat("_EmissionStrength", 3);
+        }
+        if (!isLocalPlayer)
+        {
+
+        } else
+        {
+            Game.localPlayer = this;
+        }
     }
 	
 	// Update is called once per frame
@@ -58,6 +76,11 @@ public class Player : NetworkBehaviour {
 		if (isLocalPlayer)
         {
             CheckControls();
+        }
+        if (isLocalPlayer || CarlMath.Dist(loc, Game.localPlayer.loc) < Game.localPlayer.aura.radius + cam.orthographicSize/2)
+        {
+            aura.radius = 6 + 4 * Mathf.Log(flunkies.Count + 1);
+            aura.Draw();
         }
 	}
 
@@ -141,7 +164,43 @@ public class Player : NetworkBehaviour {
             {
                 if (CarlMath.Dist(p.loc, loc) > 6)
                 {
-                    int[] targetLoc = p.GetClosestMove(loc);
+                    int[] targetLoc = p.GetClosestMove(new int[] { loc[0] - (int)Mathf.Sign(moveX), loc[1] - (int)Mathf.Sign(moveY) });
+
+                    if (Game.pieces.ContainsKey(targetLoc))
+                    {
+                        Piece o = Game.pieces[targetLoc];
+                        if (o.ownerNum == playerNum && isLocalPlayer)
+                        {
+                            int[] randomLoc = o.MoveRandomly();
+
+                            if (randomLoc != null)
+                            {
+                                if (!isServer)
+                                {
+                                    CmdMovePiece(o.loc, randomLoc, 0.06f);
+                                    MovePiece(o.loc, randomLoc, 0.06f);
+                                }
+                                else
+                                {
+                                    RpcMovePiece(o.loc, randomLoc, 0.06f);
+                                }
+                            }
+                            else
+                            {
+                                o.Die(this);
+                            }
+                        }
+                        if (o.ownerNum != playerNum)
+                        {
+                            o.Die(this);
+                        }
+                        o.Die(this);
+                    }
+                    if (Game.players.ContainsKey(targetLoc))
+                    {
+                        Player o = Game.players[targetLoc];
+                        o.Die(this);
+                    }
 
                     if (!isServer)
                     {
@@ -155,6 +214,33 @@ public class Player : NetworkBehaviour {
                 }
             }
         }        
+    }
+
+    [Command]
+    public void CmdKill(int[] deathZone, int consumerNum)
+    {
+        RpcKill(deathZone, consumerNum);
+    }
+
+    [ClientRpc]
+    public void RpcKill(int[] deathZone, int consumerNum)
+    {
+        if (isServer || !isLocalPlayer)
+            Kill(deathZone, consumerNum);
+    }
+
+    public void Kill(int[] deathZone, int consumerNum)
+    {
+        if (Game.pieces.ContainsKey(deathZone))
+        {
+            Game.pieces[deathZone].Die(Game.playersByNum[consumerNum]);
+            Debug.Log("Killing Piece");
+        }
+        if (Game.players.ContainsKey(deathZone))
+        {
+            Game.players[deathZone].Die(Game.playersByNum[consumerNum]);
+            Debug.Log("Killing Player");
+        }
     }
 
     [Command]
@@ -197,72 +283,20 @@ public class Player : NetworkBehaviour {
         if (Game.pieces.ContainsKey(newLoc))
         {
             Piece o = Game.pieces[newLoc];
-            if (o.ownerNum == playerNum && isLocalPlayer)
-            {
-                int[] targetLoc = o.MoveRandomly();
-
-                if (targetLoc != null)
-                {
-                    if (!isServer)
-                    {
-                        CmdMovePiece(o.loc, targetLoc, 0.06f);
-                        MovePiece(o.loc, targetLoc, 0.06f);
-                    }
-                    else
-                    {
-                        RpcMovePiece(o.loc, targetLoc, 0.06f);
-                    }
-                }
-                else
-                {
-                    o.Die(this);
-                }
-            }
-            if (o.ownerNum != playerNum)
-            {
-                o.Die(this);
-            }
+            o.Die(this);
         }
         if (Game.players.ContainsKey(newLoc))
         {
             Player o = Game.players[newLoc];
-            o.Die(this);
+            //o.Die(this);
         }
-        try
-        {
-            Game.players.Add(newLoc, this);
-            Game.players.Remove(loc);
-            Game.LerpMove(transform, new Vector3(newLoc[0] * 2 + 1, -7, newLoc[1] * 2 + 1), 0.08f);
-            if (spawned)
-            {
-                if (seed * 100 > 60)
-                {
-                    int spawnIndex = Mathf.FloorToInt(((seed - 0.6f) / 0.4f) * (spawnSets.Length - 0.1f));
-                    for (int i = spawnIndex - 1; i <= spawnIndex + 1; i++)
-                    {
-                        if (spawnSets[spawnIndex % spawnSets.Length].n > 0)
-                        {
-                            spawnSets[spawnIndex % spawnSets.Length].n--;
-                            GameObject newPiece = Instantiate(spawnSets[spawnIndex % spawnSets.Length].prefab);
-                            newPiece.transform.position = transform.position;
-                            newPiece.transform.rotation = transform.rotation;
-                            Piece yeet = newPiece.GetComponent<Piece>();
-                            Debug.Log("Spawning new " + yeet.type);
-                            flunkies.Add(yeet);
-                            Game.pieces.Add(loc, yeet);
-                            yeet.loc = loc;
-                            yeet.Init(this);
-                            Game.LerpMove(newPiece.transform, new Vector3(loc[0] * 2 + 1, -7, loc[1] * 2 + 1), 0.08f);
-                            Debug.Log("New piece added at " + loc[0] + ", " + loc[1]);
-                            break;
-                        }
-                    }
-                }
-            }
 
-            loc = newLoc; // Very important, don't forget about this!!!
-        }
-        catch (System.Exception e) { }
+        Game.players.Add(newLoc, this);
+        Game.players.Remove(loc);
+        Game.LerpMove(transform, new Vector3(newLoc[0] * 2 + 1, -7, newLoc[1] * 2 + 1), 0.08f);
+
+        loc = newLoc; // Very important, don't forget about this!!!
+
         //gameObject.transform.position = new Vector3(loc[0] * 2 + 1, -7, loc[1] * 2 + 1);
         
     }

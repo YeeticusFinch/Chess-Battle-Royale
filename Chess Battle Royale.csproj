@@ -327,6 +327,7 @@
     <Compile Include="Assets\_MK\MKGlow\Scripts\Settings.cs" />
     <Compile Include="Assets\Scripts\AvailableMove.cs" />
     <Compile Include="Assets\Scripts\CarlMath.cs" />
+    <Compile Include="Assets\Scripts\CircleDraw.cs" />
     <Compile Include="Assets\Scripts\Game.cs" />
     <Compile Include="Assets\Scripts\Piece.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
